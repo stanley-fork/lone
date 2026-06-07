@@ -279,8 +279,9 @@ struct lone_lisp_text {
 };
 
 struct lone_lisp_bytes {
-	struct lone_bytes data;
+	struct lone_bytes data; /* { count, pointer } where count is the logical length */
 	lone_hash hash;
+	size_t capacity;        /* total allocated capacity plus a trailing NUL byte */
 };
 
 static_assert(offsetof(struct lone_lisp_text, hash) == offsetof(struct lone_lisp_symbol, hash),
