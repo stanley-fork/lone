@@ -142,7 +142,10 @@ for example.
 ### Inline small values
 
 Remaining register value patterns encode type + length.
-Data bits hold up to 7 bytes directly.
+Data bits hold up to 7 bytes directly. However, lone
+only uses 6 bytes for symbols, texts and bytes values.
+The last byte is an implicit null byte for compatibility
+with system calls that require C strings.
 
 |  Bits |                   Value | Meaning                                      |
 |------:|------------------------:|----------------------------------------------|
@@ -162,7 +165,6 @@ Full inline value tag enumeration:
 |    `0x89` |       Symbol      | `4`                 |
 |    `0x8B` |       Symbol      | `5`                 |
 |    `0x8D` |       Symbol      | `6`                 |
-|    `0x8F` |       Symbol      | `7`                 |
 |    `0x91` |        Text       | `0`                 |
 |    `0x93` |        Text       | `1`                 |
 |    `0x95` |        Text       | `2`                 |
@@ -170,7 +172,6 @@ Full inline value tag enumeration:
 |    `0x99` |        Text       | `4`                 |
 |    `0x9B` |        Text       | `5`                 |
 |    `0x9D` |        Text       | `6`                 |
-|    `0x9F` |        Text       | `7`                 |
 |    `0xA1` |       Bytes       | `0`                 |
 |    `0xA3` |       Bytes       | `1`                 |
 |    `0xA5` |       Bytes       | `2`                 |
@@ -178,7 +179,6 @@ Full inline value tag enumeration:
 |    `0xA9` |       Bytes       | `4`                 |
 |    `0xAB` |       Bytes       | `5`                 |
 |    `0xAD` |       Bytes       | `6`                 |
-|    `0xAF` |       Bytes       | `7`                 |
 
 Type detection masks:
 
@@ -189,7 +189,7 @@ Type detection masks:
 |             Bytes | `(tag & 0xF1) == 0xA1` |
 |               Any | `(tag & 0x81) == 0x81` |
 
-Common data that fit inline within 7 bytes:
+Common data that fit inline within 6 bytes:
 
 | Inline value type | Length | Examples                                                          |
 |------------------:|:------:|-------------------------------------------------------------------|
@@ -199,7 +199,6 @@ Common data that fit inline within 7 bytes:
 |            Symbol |    4   | `list` `cons` `rest` `true` `read` `sort`                         |
 |            Symbol |    5   | `first` `false` `quote` `begin` `print` `apply`                   |
 |            Symbol |    6   | `lambda` `define` `import` `export` `filter`                      |
-|            Symbol |    7   | `println` `display` `unquote` `flatten` `require`                 |
 |              Text |    0   | `""`                                                              |
 |              Text |    1   | `"\n"` `" "` `"/"` `"."` `","` `";"` `"0"`                        |
 |              Text |    2   | `"\r\n"` `", "` `": "`                                            |

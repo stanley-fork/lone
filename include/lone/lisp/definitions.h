@@ -111,7 +111,7 @@
 #define LONE_LISP_INLINE_TYPE_BYTES        0xA1  /* 1_010_xxx_1 */
 #define LONE_LISP_INLINE_LENGTH_SHIFT      1
 #define LONE_LISP_INLINE_LENGTH_MASK       0x07  /* 3 bits for length 0-7 */
-#define LONE_LISP_INLINE_MAX_LENGTH        7
+#define LONE_LISP_INLINE_MAX_LENGTH        6
 
 /* Flag bit in an INTERCEPTOR_DELIMITER stack frame.
  * Set while that interceptor is dispatching a signal.

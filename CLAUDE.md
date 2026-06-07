@@ -167,9 +167,9 @@ Non-heap tags:
   - `0x03` — nil
   - `0x05` — true
   - `0x07` — false
-  - `0x81`..`0x8F` — inline symbol (0..7 bytes in-word)
-  - `0x91`..`0x9F` — inline text
-  - `0xA1`..`0xAF` — inline bytes
+  - `0x81`..`0x8D` — inline symbol (0..6 bytes in-word)
+  - `0x91`..`0x9D` — inline text
+  - `0xA1`..`0xAD` — inline bytes
 
 Heap tags (even, bit 0 = 0): module, function, primitive, continuation,
 generator, list, vector, table, shape, symbol, text, bytes.
@@ -374,9 +374,9 @@ Eight built-in modules, registered at startup:
   - `vector` — `get`, `set`, `slice`, `each`, `count`
   - `table` — `get`, `set`, `delete`, `each`, `count`
   - `text` — `to-symbol`, `join`, `concatenate`
-  - `bytes` — `new`, `zero?`, plus read/write primitives for
-    u8/s8/u16/s16/u32/s32 in native, little-endian,
-    and big-endian byte orders
+  - `bytes` — `new` (growable; optional capacity), `zero?`, `append`,
+    plus read/write/append primitives for u8/s8/u16/s16/u32/s32/u64/s64
+    in native, little-endian, and big-endian byte orders
   - `linux` — `system-call` primitive, plus values:
     `argument-count`, `arguments`, `environment`,
     `auxiliary-vector`, `system-call-table`

@@ -117,8 +117,8 @@ The helper dispatches by type, computes the hash
 via the configured function, stores the result,
 and sets `hash_cached` to true.
 
-Symbols, texts, and bytes longer than seven bytes hash by content.
-Bytes of seven bytes or fewer hash to the equivalent inline form's
+Symbols, texts, and bytes longer than six bytes hash by content.
+Bytes of six bytes or fewer hash to the equivalent inline form's
 tagged word, so heap and inline bytes of identical content always
 produce identical hashes. Lists combine the cached hashes of their
 `first` and `rest` children with the `LIST` tag prepended.
@@ -132,15 +132,15 @@ can take.
  - **Symbols**
 
    Symbols are interned. A given name has exactly one
-   canonical form: inline if seven bytes or fewer, heap
+   canonical form: inline if six bytes or fewer, heap
    otherwise. Equal symbols share a tagged word and
    therefore hash equally.
 
  - **Texts**
 
-   Texts of seven bytes or fewer are always inline.
+   Texts of six bytes or fewer are always inline.
    Heap text only exists for content longer than
-   seven bytes. The two forms never overlap,
+   six bytes. The two forms never overlap,
    so they never need to hash equally.
 
  - **Bytes**
@@ -148,13 +148,13 @@ can take.
    Inline bytes are always frozen and use their tagged
    word as the hash. Heap bytes are mutable until they
    are explicitly frozen, and only then are they hashable.
-   A frozen heap bytes value of seven bytes or fewer can
+   A frozen heap bytes value of six bytes or fewer can
    hold the same content as an inline bytes value.
    To keep their hashes equal, the short heap bytes
    synthesize the equivalent inline tagged word at
    hash time.
 
-   Heap bytes longer than seven bytes have no inline
+   Heap bytes longer than six bytes have no inline
    counterpart and hash by content.
 
  - **Lists**
