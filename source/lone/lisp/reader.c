@@ -434,6 +434,16 @@ static struct lone_bytes lone_lisp_reader_consume_text_content(
 	output[output_length] = '\0';
 	lone_lisp_reader_consume(reader);
 
+	/* shrink output to the decoded text length
+	   so that allocation and deallocation agree */
+	output = lone_memory_reallocate(
+		lone->system, output,
+		buffer_size, 1,
+		output_length + 1, 1,
+		1,
+		LONE_MEMORY_ALLOCATION_FLAGS_NONE
+	);
+
 	result.pointer = output;
 	result.count = output_length;
 	return result;
@@ -501,6 +511,16 @@ static struct lone_bytes lone_lisp_reader_consume_bytes_content(
 
 	output[output_length] = '\0';
 	lone_lisp_reader_consume(reader);
+
+	/* shrink output to the decoded text length
+	   so that allocation and deallocation agree */
+	output = lone_memory_reallocate(
+		lone->system, output,
+		buffer_size, 1,
+		output_length + 1, 1,
+		1,
+		LONE_MEMORY_ALLOCATION_FLAGS_NONE
+	);
 
 	result.pointer = output;
 	result.count = output_length;
