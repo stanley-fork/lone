@@ -6,6 +6,8 @@
 #include <lone/lisp/machine.h>
 #include <lone/lisp/machine/stack.h>
 #include <lone/lisp/module.h>
+#include <lone/lisp/utilities.h>
+#include <lone/lisp/heap.h>
 
 #include <lone/memory/allocator.h>
 
@@ -93,55 +95,98 @@ void lone_lisp_modules_intrinsic_bytes_initialize(struct lone_lisp *lone)
 
 LONE_LISP_PRIMITIVE(bytes_new)
 {
-	struct lone_lisp_value arguments, count;
+	struct lone_lisp_value arguments, count, capacity, cursor;
+	lone_lisp_integer count_i, capacity_i;
+	bool has_capacity;
 
 	switch (step) {
 	case 0:
 
 		arguments = lone_lisp_machine_pop_value(lone, machine);
 
-		goto destructure;
+		goto parse;
 
-	case 1: /* resumed with a replacement count from range-error */
-
-		count = machine->value;
-
-		goto validate_count_range;
-
-	case 2: /* resumed with a replacement count from type-error */
-
-		count = machine->value;
-
-		goto validate_count_type;
-
-	case 3: /* resumed with a replacement arguments list from arity-error */
+	case 1: /* resumed with a replacement argument list */
 
 		arguments = machine->value;
 
-		goto destructure;
+		if (!lone_lisp_list_is_proper(lone, arguments)) {
+			return
+				lone_lisp_signal_emit(
+					lone,
+					machine,
+					1,
+					lone->symbols.tags.type_error,
+					arguments
+				);
+		}
+
+		goto parse;
+
+	case 2: /* resumed with a replacement count */
+
+		has_capacity = (bool) lone_lisp_integer_of(lone_lisp_machine_pop_value(lone, machine));
+		capacity = lone_lisp_machine_pop_value(lone, machine);
+		count = machine->value;
+
+		goto validate_count;
+
+	case 3: /* resumed with a replacement capacity */
+
+		count = lone_lisp_machine_pop_value(lone, machine);
+		capacity = machine->value;
+
+		goto validate_capacity;
 
 	default:
-		break;
+		__builtin_trap();
 	}
 
-	linux_exit(-1);
+parse:
 
-destructure:
+	/* accept 1 or 2 arguments: (new count) or (new count capacity) */
 
-	if (lone_lisp_list_destructure(lone, arguments, 1, &count)) {
+	cursor = arguments;
+
+	if (lone_lisp_is_nil(cursor)) {
 		return
 			lone_lisp_signal_emit(
 				lone,
 				machine,
-				3,
+				1,
 				lone->symbols.tags.arity_error,
 				arguments
 			);
 	}
 
-validate_count_type:
+	count = lone_lisp_list_first(lone, cursor);
+	cursor = lone_lisp_list_rest(lone, cursor);
+
+	if (!lone_lisp_is_nil(cursor)) {
+		capacity = lone_lisp_list_first(lone, cursor);
+		cursor = lone_lisp_list_rest(lone, cursor);
+		has_capacity = true;
+	} else {
+		capacity = lone_lisp_nil();
+		has_capacity = false;
+	}
+
+	if (!lone_lisp_is_nil(cursor)) {
+		return
+			lone_lisp_signal_emit(
+				lone,
+				machine,
+				1,
+				lone->symbols.tags.arity_error,
+				arguments
+			);
+	}
+
+validate_count:
 
 	if (!lone_lisp_is_integer(lone, count)) {
+		lone_lisp_machine_push_value(lone, machine, capacity);
+		lone_lisp_machine_push_integer(lone, machine, (lone_lisp_integer) has_capacity);
 		return
 			lone_lisp_signal_emit(
 				lone,
@@ -152,21 +197,58 @@ validate_count_type:
 			);
 	}
 
-validate_count_range:
-
-	if (lone_lisp_integer_of(count) <= 0) {
+	if (lone_lisp_integer_of(count) < 0) {
+		lone_lisp_machine_push_value(lone, machine, capacity);
+		lone_lisp_machine_push_integer(lone, machine, (lone_lisp_integer) has_capacity);
 		return
 			lone_lisp_signal_emit(
 				lone,
 				machine,
-				1,
+				2,
 				lone->symbols.tags.range_error,
 				count
 			);
 	}
 
+	if (!has_capacity) {
+		lone_lisp_machine_push_value(lone, machine,
+				lone_lisp_bytes_create(lone, (size_t) lone_lisp_integer_of(count)));
+		return 0;
+	}
+
+validate_capacity:
+
+	if (!lone_lisp_is_integer(lone, capacity)) {
+		lone_lisp_machine_push_value(lone, machine, count);
+		return
+			lone_lisp_signal_emit(
+				lone,
+				machine,
+				3,
+				lone->symbols.tags.type_error,
+				capacity
+			);
+	}
+
+	count_i = lone_lisp_integer_of(count);
+
+	if (lone_lisp_integer_of(capacity) < count_i) {
+		lone_lisp_machine_push_value(lone, machine, count);
+		return
+			lone_lisp_signal_emit(
+				lone,
+				machine,
+				3,
+				lone->symbols.tags.range_error,
+				capacity
+			);
+	}
+
+	capacity_i = lone_lisp_integer_of(capacity);
+
 	lone_lisp_machine_push_value(lone, machine,
-			lone_lisp_bytes_create(lone, lone_lisp_integer_of(count)));
+			lone_lisp_bytes_create_with_capacity(lone,
+				(size_t) count_i, (size_t) capacity_i));
 	return 0;
 }
 

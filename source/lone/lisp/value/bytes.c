@@ -44,6 +44,27 @@ struct lone_lisp_value lone_lisp_bytes_copy(struct lone_lisp *lone, unsigned cha
 
 struct lone_lisp_value lone_lisp_bytes_create(struct lone_lisp *lone, size_t count)
 {
-	unsigned char *pointer = lone_memory_allocate(lone->system, count + 1, 1, 1, LONE_MEMORY_ALLOCATION_FLAGS_NONE);
-	return lone_lisp_bytes_transfer(lone, pointer, count, true);
+	return lone_lisp_bytes_create_with_capacity(lone, count, count);
+}
+
+struct lone_lisp_value lone_lisp_bytes_create_with_capacity(struct lone_lisp *lone,
+		size_t count, size_t capacity)
+{
+	struct lone_lisp_heap_value *actual;
+	unsigned char *pointer;
+
+	pointer = lone_memory_allocate(lone->system, capacity + 1, 1, 1, LONE_MEMORY_ALLOCATION_FLAGS_NONE);
+
+	actual = lone_lisp_heap_allocate_value(lone);
+	actual->as.bytes.capacity = capacity;
+
+	return lone_lisp_buffer_transfer(
+		lone,
+		actual,
+		&actual->as.bytes.data,
+		pointer,
+		count,
+		true,
+		LONE_LISP_TAG_BYTES
+	);
 }

@@ -788,6 +788,9 @@ struct lone_lisp_value lone_lisp_bytes_copy(struct lone_lisp *lone,
 struct lone_lisp_value lone_lisp_bytes_create(struct lone_lisp *lone,
 		size_t count);
 
+struct lone_lisp_value lone_lisp_bytes_create_with_capacity(struct lone_lisp *lone,
+		size_t count, size_t capacity);
+
 /* ╭───────────────────────┨ LONE LISP INTERPRETER ┠────────────────────────╮
    │                                                                        │
    │    The lone lisp interpreter is composed of all internal state         │

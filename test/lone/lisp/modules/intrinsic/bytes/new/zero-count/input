@@ -1,0 +1,4 @@
+(import (lone print) (bytes new zero?))
+
+(print (zero? (new 0)))
+(print (new 0))

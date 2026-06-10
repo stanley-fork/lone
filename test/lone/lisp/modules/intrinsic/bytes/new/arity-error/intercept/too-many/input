@@ -1,0 +1,3 @@
+(import (lone print intercept lambda quote) (bytes new))
+
+(print (intercept (('arity-error (lambda (v) v))) (new 4 8 16)))

@@ -1,0 +1,8 @@
+(import (lone print set) (bytes new write-u8 read-u8))
+
+(set b (new 4 16))
+(print b)
+(write-u8 b 0 65)
+(write-u8 b 3 90)
+(print (read-u8 b 0))
+(print (read-u8 b 3))

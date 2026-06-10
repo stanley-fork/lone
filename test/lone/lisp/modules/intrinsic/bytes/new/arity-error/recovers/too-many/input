@@ -1,0 +1,3 @@
+(import (lone print intercept lambda quote) (bytes new) (list construct))
+
+(print (intercept (('arity-error (lambda (v c) (c (construct 8 ()))))) (new 4 8 16)))
